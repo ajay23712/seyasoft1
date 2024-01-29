@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Edit File</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: none;
+            margin-top: 20px;
+        }
+
+        p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: #4caf50;
+            margin-top: 10px;
+            font-size: 16px;
+            display: block;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Style for the Ask button */
+        .ask-button {
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            display: block;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .ask-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+
+    <!-- Button to toggle content visibility -->
+
+
+    <!-- Content section -->
+    <div class="content">
+        <p>{{ content }}</p>
+    </div>
+
+    <!-- Edit button -->
+    <!-- Edit button -->
+<a href="{{ url_for('uploadd_page') }}">Edit</a>
+
+
+    <!-- Ask button -->
+    <a class="ask-button" href="{{ url_for('ask', filename=title) }}">Ask</a>
+
+    <script>
+        function toggleContent() {
+            var contentDiv = document.querySelector('.content');
+            contentDiv.style.display = (contentDiv.style.display === 'none' || contentDiv.style.display === '') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

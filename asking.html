@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask eNurl</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #0a0a0a;
+            margin-bottom: 10px;
+            text-shadow: white;
+        }
+
+        #logo-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .logo::before,
+        .logo::after {
+            content: ' ';
+            position: absolute;
+            width: 100%;
+            height: 20%;
+            background-color: #050505;
+        }
+
+        .logo::before {
+            top: 0;
+        }
+
+        .logo::after {
+            bottom: 0;
+        }
+
+        .logo span {
+            position: absolute;
+            width: 100%;
+            height: 60%;
+            background-color: #0d0c0c;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .logo span::before,
+        ..logo span::after {
+            content: ' ';
+            position: absolute;
+            width: 20%;
+            height: 100%;
+            background-color: #0e0d0d;
+        }
+
+        .logo span::before {
+            left: 0;
+        }
+
+        .logo span::after {
+            right: 0;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #ask-form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            max-width: 700px;
+            width: 100%;
+            text-align: left;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        label {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 8px;
+            max-width: 80%;
+        }
+
+        #userInput {
+            width: calc(100% - 24px);
+            padding: 10px;
+            margin: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: none;
+        }
+
+        button {
+            background-color: #0c0c0c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 8px 12px;
+        }
+
+        button:hover {
+            background-color: #13514a;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-question {
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 8px 12px;
+            max-width: 60%;
+            align-self: flex-end;
+        }
+
+        .assistant-answer {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            margin: 8px 12px;
+            max-width: 60%;
+            align-self: flex-start;
+        }
+
+        #loading-symbol {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ask eNurl</h1>
+
+    <!-- Logo container -->
+    <div id="logo-container" class="logo">
+        <span></span>
+    </div>
+
+    <form id="ask-form">
+        <label for="userInput">ASK any questions to eNurl:</label>
+        <input type="text" id="userInput" />
+        <button type="button" onclick="askChatGPT()">Submit</button>
+        <button type="button" id="copyUrlButton" onclick="copyUrl()">Copy URL</button>
+        <button type="button" id="clearInputButton">Clear Input</button>
+    </form>
+
+    <!-- Display area for chat -->
+    <div id="chat-container">
+        <!-- Display area for responses -->
+        <div id="chatResponse"></div>
+
+        <!-- Loading symbol -->
+        <div id="loading-symbol">
+            Loading...
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Display area for asked questions... -->
+
+    <!-- Include JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const askedQuestionsList = document.getElementById('askedQuestionsList');
+            const chatResponseElement = document.getElementById('chatResponse');
+
+            function addAskedQuestion(question) {
+                const listItem = document.createElement('div');
+                listItem.className = 'user-question';
+                listItem.textContent = question;
+                chatResponseElement.appendChild(listItem);
+            }
+
+            async function typeWriter(text, element) {
+                for (let i = 0; i < text.length; i++) {
+                    element.innerText += text.charAt(i);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+
+                    // Scroll down to the bottom
+                    element.scrollTop = element.scrollHeight;
+                }
+            }
+
+            function clearQuestions() {
+                // Clear the user's input
+                document.getElementById('userInput').value = '';
+            }
+
+            window.askChatGPT = async function () {
+                const userInput = document.getElementById('userInput').value;
+                const loadingSymbol = document.getElementById('loading-symbol');
+
+                // Ensure a user query is provided
+                if (!userInput) {
+                    alert('Please provide a user query.');
+                    return;
+                }
+
+                // Show loading symbol
+                loadingSymbol.style.display = 'block';
+
+                // Add the asked question to the list
+                addAskedQuestion(userInput);
+
+                // Make a request to the backend
+                const response = await fetch('/ask-chatgpt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ query: userInput }),
+                });
+
+                const data = await response.json();
+
+                // Hide loading symbol
+                loadingSymbol.style.display = 'none';
+
+                // Create elements for assistant answer
+                const assistantAnswer = document.createElement('div');
+                assistantAnswer.className = 'assistant-answer';
+                assistantAnswer.textContent = data.response;
+
+                // Append the elements to the chat container
+                chatResponseElement.appendChild(assistantAnswer);
+
+                // Simulate typing effect
+                await typeWriter(data.response, assistantAnswer);
+
+                // Scroll down to the bottom
+                chatResponseElement.scrollTop = chatResponseElement.scrollHeight;
+            };
+
+            window.copyUrl = function () {
+                // Get the base URL without any query parameters
+                const currentUrl = window.location.origin + window.location.pathname;
+
+                // Add the 'uploaded' query parameter to indicate the uploaded file
+                const finalUrl = currentUrl + '?uploaded=true';
+
+                navigator.clipboard.writeText(finalUrl);
+
+                alert('URL copied! Share this URL with your friend.');
+            };
+
+            // Add event listener for the "Enter" key to submit the form
+            document.getElementById('userInput').addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    askChatGPT();
+                }
+            });
+
+            // Add event listener for the "Clear Input" button
+            document.getElementById('clearInputButton').addEventListener('click', function () {
+                clearQuestions();
+            });
+        });
+    </script>
+</body>
+
+</html>
