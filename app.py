@@ -1,4 +1,4 @@
-import time
+eimport time
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -31,7 +31,7 @@ if not os.path.exists(app.config['REGISTERED_FILE']):
         pass
 
 # Set your OpenAI API key
-openai.api_key = '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'
+openai.api_key = '{{our api key}}'
 
 # Load the spaCy English model
 nlp = spacy.load("en_core_web_md")
@@ -41,7 +41,7 @@ document_content = ""
 
 # Define different engines for user queries and document context
 user_query_engine = "gpt-3.5-turbo-0613"
-document_context_engine = "gpt-3.5-turbo-0613"
+document_context_engine = "gpt-3.5-turbo-0613"   // you can use your model
 
 def load_user_credentials():
     users = {}
